@@ -1,10 +1,10 @@
 # promremote
 
-`promremote` is a Prometheus remote write client written in Go.
+`promremote` is a Prometheus remote write client and libs written in Go.
 
 ## Installation
 
-`go get -u github.com/m3db/prometheus_remote_client_golang`
+`go get -u github.com/Hoverhuang-er/prometheus_remote_client_golang`
 
 ## Use
 

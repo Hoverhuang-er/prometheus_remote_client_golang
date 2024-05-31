@@ -1,22 +1,12 @@
 # Stage 1: build
-FROM golang:1.12-alpine AS builder
+FROM golang:1.22.3-alpine3.20 AS builder
 LABEL maintainer="The M3DB Authors <m3db@googlegroups.com>"
-
-# Install Glide
-RUN apk add --update git
-
-# Add source code
-RUN mkdir -p /src/prometheus_remote_client_golang
-ADD . /src/prometheus_remote_client_golang
-
-# Build cli tool binary
-RUN cd /src/prometheus_remote_client_golang && \
-    go build github.com/m3db/prometheus_remote_client_golang/cmd/promremotecli
-
+WORKDIR /opt
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags "--extldflags '-static -s -w'" -o /opt/promremotecli cmd/promremotecli/main.go
 # Stage 2: lightweight "release"
-FROM alpine:latest
+FROM debian:trixie
 LABEL maintainer="The M3DB Authors <m3db@googlegroups.com>"
-
-COPY --from=builder /src/prometheus_remote_client_golang/promremotecli /bin/promremotecli
-
-ENTRYPOINT [ "/bin/promremotecli" ]
+WORKDIR /opt
+COPY --from=builder /opt/promremotecli /opt/promremotecli
+ENTRYPOINT ["/opt/promremotecli"]

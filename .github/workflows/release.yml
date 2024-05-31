@@ -51,10 +51,14 @@ jobs:
           go-version: 1.22
       - name: Build
         run: CGO_ENABLE=0 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli-${{ matrix.os }} -v ./cmd/promremotecli
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: create release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./promremotecli-${{ matrix.os }}
-          asset_name: promremotecli-${{ matrix.os }}
-          asset_content_type: application/octet-stream
+          files: |
+            promremotecli-${{ matrix.os }}
+          token: ${{ secrets.GH_TOKEN }}
+          release_name: ${{ github.ref }}
+          body: |
+            release for ${{ github.ref }}
+          draft: false
+          prerelease: false

@@ -1,0 +1,60 @@
+name: Release LightDev
+
+on:
+  push:
+    branches:
+      - main
+      - dev-startup
+      - mock_*
+    tags:
+      - "l*"
+      - "v*"
+      - "v*.*"
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_image_ghcr:
+    name: Build Image for All in One(Backend + WebUI + CommandlineTools)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          file: ./tests/Dockerfile
+          tags: ghcr.io/hoverhuang-er/builder-amz/promremotecli:v1
+  build_promremotecli:
+    name: Build Image for All in One(Backend + WebUI + CommandlineTools)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.22
+      - name: Build
+        run: CGO_ENABLE=0 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli-${{ matrix.os }} -v ./cmd/promremotecli
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./promremotecli-${{ matrix.os }}
+          asset_name: promremotecli-${{ matrix.os }}
+          asset_content_type: application/octet-stream

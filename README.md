@@ -9,11 +9,17 @@
 ## Use
 
 `promremote` is used to send metrics to a Prometheus remote write endpoint such as supported by 
-[m3coordinator](http://m3db.github.io/m3/overview/components/#m3-coordinator). It can be pulled into
+m3db, Prometheus, thanos, victoriaMetrics,InfluxDB and other TimeSeriesDB. It can be pulled into
 an existing codebase as a client library or used as a cli tool (`cmd/main.go`) for ad hoc testing
 purposes.
 
 **IMPORTANT:** A running program or application that has a Prometheus remote write endpoint is required.
+
+### Update
+
+- 2024-05-31 Release v0.1.0, it both support client and cli. cli can be used to send metrics to a Prometheus remote write endpoint. download the binary from release page.
+- 2024-05-30 Use hashicorp/go-retryablehttp instead of net/http for retryable http client and batch upgrate go mod dependencies.
+- 2024-05-29 Switch go version from 1.14 to 1.22.3, and add Prometheus remote write URL to env variable support.
 
 ### Client library
 
@@ -57,6 +63,7 @@ if err := client.WriteTimeSeries(timeSeriesList); err != nil {
 }
 ```
 
+
 ### CLI
 
 If one wants to use `promremote` as a CLI, he or she can utilize the tool located in the `cmd/`
@@ -70,3 +77,4 @@ first parameter in the `-d` flag.
 ```bash
 go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
 ```
+

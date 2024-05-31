@@ -1,4 +1,4 @@
-# Stage 1: build
+# Stage 1: build golang binary
 FROM golang:1.22.3-alpine3.20 AS builder
 LABEL maintainer="Hover Huang <hoverhuang@outlook.com>"
 WORKDIR /opt

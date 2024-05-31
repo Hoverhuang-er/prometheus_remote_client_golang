@@ -34,7 +34,7 @@ jobs:
         with:
           context: .
           push: true
-          file: .Dockerfile
+          file: ./Dockerfile
           tags: ghcr.io/hoverhuang-er/builder-amz/promremotecli:v1
   build_promremotecli:
     name: Build Image for All in One(Backend + WebUI + CommandlineTools)

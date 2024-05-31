@@ -25,6 +25,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-retryablehttp"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -114,8 +115,8 @@ type Config struct {
 	//HTTPClientTimeout is the timeout that is set for the client.
 	HTTPClientTimeout time.Duration `yaml:"httpClientTimeout"`
 
-	// If not nil, http client is used instead of constructing one.
-	HTTPClient *http.Client
+	// Replace to Hashicorp go-retryablehttp, If not nil, http client is used instead of constructing one.
+	HTTPClient *retryablehttp.Client
 
 	// UserAgent is the `User-Agent` header in the request.
 	UserAgent string `yaml:"userAgent"`
@@ -165,7 +166,7 @@ func HTTPClientTimeoutOption(httpClientTimeout time.Duration) ConfigOption {
 }
 
 // HTTPClientOption sets the HTTP client that is set for the client.
-func HTTPClientOption(httpClient *http.Client) ConfigOption {
+func HTTPClientOption(httpClient *retryablehttp.Client) ConfigOption {
 	return func(c *Config) {
 		c.HTTPClient = httpClient
 	}
@@ -180,7 +181,7 @@ func UserAgent(userAgent string) ConfigOption {
 
 type client struct {
 	writeURL   string
-	httpClient *http.Client
+	httpClient *retryablehttp.Client
 	userAgent  string
 }
 
@@ -190,10 +191,16 @@ func NewClient(c Config) (Client, error) {
 		return nil, err
 	}
 
-	httpClient := &http.Client{
+	oldhttpClient := &http.Client{
 		Timeout: c.HTTPClientTimeout,
 	}
 
+	httpClient := &retryablehttp.Client{
+		HTTPClient:   oldhttpClient,
+		RetryWaitMin: 15 * time.Millisecond,
+		RetryWaitMax: 90 * time.Second,
+		RetryMax:     3,
+	}
 	if c.HTTPClient != nil {
 		httpClient = c.HTTPClient
 	}
@@ -226,7 +233,7 @@ func (c *client) WriteProto(
 	encoded := snappy.Encode(nil, data)
 
 	body := bytes.NewReader(encoded)
-	req, err := http.NewRequest("POST", c.writeURL, body)
+	req, err := retryablehttp.NewRequest("POST", c.writeURL, body)
 	if err != nil {
 		return result, writeError{err: err}
 	}

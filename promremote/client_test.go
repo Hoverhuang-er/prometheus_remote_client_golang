@@ -22,6 +22,7 @@ package promremote
 
 import (
 	"context"
+	"github.com/hashicorp/go-retryablehttp"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -169,12 +170,14 @@ func TestValidateConfig(t *testing.T) {
 }
 
 func TestProvidedHTTPClient(t *testing.T) {
+	stdhttpClient := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	cfg := NewConfig(
-		HTTPClientOption(&http.Client{
-			Timeout: 10 * time.Second,
+		HTTPClientOption(&retryablehttp.Client{
+			HTTPClient: stdhttpClient,
 		}),
 	)
-
 	_, err := NewClient(cfg)
 	require.NoError(t, err)
 }

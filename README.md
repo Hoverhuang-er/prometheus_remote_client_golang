@@ -74,7 +74,29 @@ remote write endpoint. Below is an example showing a metric with two labels
 **Note**: One can either specify a Unix timestamp (e.g. `1556026725`) or the keyword `now` as the
 first parameter in the `-d` flag.
 
+#### Install
+
+```bash
+go install github.com/Hoverhuang-er/prometheus_remote_client_golang/cmd/promremotecli
+```
+
+#### mauanl run
+
 ```bash
 go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
 ```
 
+#### Download binary
+
+Download the binary from the release page and run it.
+
+```bash
+wget https://github.com/Hoverhuang-er/prometheus_remote_client_golang/releases/download/v0.1.0/promremotecli_linux_amd64
+mv promremotecli_linux_amd64 promremotecli
+chmod +x promremotecli
+mv promremotecli /usr/local/bin
+```
+Run the binary
+```bash
+promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
+```

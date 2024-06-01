@@ -1,4 +1,4 @@
-name: Release LightDev
+name: Release Promremotecli
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build_image_ghcr:
-    name: Build Image for All in One(Backend + WebUI + CommandlineTools)
+    name: Build Image for Promremotecli Container Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
           tags: |
             ghcr.io/hoverhuang-er/promremotecli:latest
   build_promremotecli:
-    name: Build Image for All in One(Backend + WebUI + CommandlineTools)
+    name: Build cli for promremote on different platform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -50,6 +50,7 @@ jobs:
             1.22
       - name: Build
         run: |
+          go mod download
           echo "build promremotecli for linux/windows/darwin on amd64"
           CGO_ENABLE=0 GOOS=linux GOARCH=amd64 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli_linux_amd64 ./cmd/promremotecli
           CGO_ENABLE=0 GOOS=darwin GOARCH=amd64 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli_darwin_amd64 ./cmd/promremotecli
@@ -60,7 +61,6 @@ jobs:
           CGO_ENABLE=0 GOOS=windows GOARCH=arm64 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli_windows_arm64.exe ./cmd/promremotecli
           echo "build promremotecli for linux on riscv(64)"
           CGO_ENABLE=0 GOOS=linux GOARCH=riscv64 go build -ldflags "--extldflags '-static' -s -w" -o promremotecli_linux_riscv64 ./cmd/promremotecli
-          CGO_ENABLE=0 GOOS=linux GOARCH=riscv go build -ldflags "--extldflags '-static' -s -w" -o promremotecli_linux_arm ./cmd/promremotecli
       - name: create release
         uses: softprops/action-gh-release@v2
         with:
@@ -72,7 +72,6 @@ jobs:
             promremotecli_darwin_arm64
             promremotecli_windows_arm64.exe
             promremotecli_linux_riscv64
-            promremotecli_linux_arm
           token: ${{ secrets.GH_TOKEN }}
           release_name: ${{ github.ref }}
           body: |

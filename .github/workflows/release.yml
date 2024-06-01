@@ -35,7 +35,7 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            ghcr.io/hoverhuang-er/promremotecli:latest
+            docker.io/promremote:cli
   build_promremotecli:
     name: Build cli for promremote on different platform
     runs-on: ubuntu-latest

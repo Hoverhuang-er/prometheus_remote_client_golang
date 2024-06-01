@@ -35,7 +35,7 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            docker.io/promremote:cli
+            docker.io/promremote/cli:latest
   build_promremotecli:
     name: Build cli for promremote on different platform
     runs-on: ubuntu-latest

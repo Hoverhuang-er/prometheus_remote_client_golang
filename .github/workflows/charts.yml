@@ -7,8 +7,6 @@ on:
       - master
     tags:
       - "c*"
-    tags-ignore:
-      - "v*"
 
 concurrency:
   group: ${{ github.ref }}

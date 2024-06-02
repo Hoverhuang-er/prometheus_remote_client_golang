@@ -38,7 +38,7 @@ jobs:
           file: ./Dockerfile
           tags: |
             promremote/cli:latest
-            promremote/cli:${{ github.refs/tags }}
+            promremote/cli:${{ github.ref_name }}
   build_promremotecli:
     name: Build cli for promremote on different platform
     runs-on: ubuntu-latest

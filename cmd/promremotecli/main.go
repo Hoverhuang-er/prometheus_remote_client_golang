@@ -47,12 +47,16 @@ func main() {
 	var (
 		log            = stdlog.New(os.Stderr, "promremotecli_log ", stdlog.LstdFlags)
 		writeURLFlag   string
+		loopFlag       int
+		ctxFlag        int
 		labelsListFlag labelList
 		headerListFlag headerList
 		dpFlag         dp
 	)
 
 	flag.StringVar(&writeURLFlag, "u", promremote.DefaultRemoteWrite, "remote write endpoint")
+	flag.IntVar(&loopFlag, "l", 1, "enable loop mode, write datapoint every 1s. 0 to disable loop mode.")
+	flag.IntVar(&ctxFlag, "ctx", 5, "enable context mode, when context.deadline is reached, printout the result and exit.")
 	flag.Var(&labelsListFlag, "t", "label pair to include in metric. specify as key:value e.g. status_code:200")
 	flag.Var(&headerListFlag, "h", "headers to set in the request, e.g. 'User-Agent: foo'")
 	flag.Var(&dpFlag, "d", "datapoint to add. specify as unixTimestamp(int),value(float) e.g. 1556026059,14.23. use `now` instead of timestamp for current time")
@@ -65,10 +69,24 @@ func main() {
 			Datapoint: promremote.Datapoint(dpFlag),
 		},
 	}
-
 	cfg := promremote.NewConfig(
 		promremote.WriteURLOption(writeURLFlag),
 	)
+	ctx := context.Background()
+	if ctxFlag > 0 {
+		ctx, _ = context.WithTimeout(ctx, time.Duration(ctxFlag)*time.Second)
+	}
+	if loopFlag > 1 {
+		cfg = promremote.NewConfig(
+			promremote.WriteURLOption(writeURLFlag),
+			promremote.LoopTSOption(loopFlag),
+		)
+	} else {
+		cfg = promremote.NewConfig(
+			promremote.WriteURLOption(writeURLFlag),
+			promremote.LoopTSOption(1),
+		)
+	}
 
 	client, err := promremote.NewClient(cfg)
 	if err != nil {
@@ -86,9 +104,27 @@ func main() {
 		}
 	}
 	log.Println("writing to", writeURLFlag)
+	if loopFlag > 1 {
+		log.Println("looping every", loopFlag, "seconds")
+		nc := time.NewTicker(time.Duration(loopFlag) * time.Second)
+		for range nc.C {
+			rs, err := clientWriteTS(context.Background(), log, client, tsList, headers)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println(rs)
+		}
+	} else {
+		rs, err := clientWriteTS(context.Background(), log, client, tsList, headers)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(rs)
+	}
+}
 
-	result, writeErr := client.WriteTimeSeries(context.Background(), tsList,
-		promremote.WriteOptions{Headers: headers})
+func clientWriteTS(ctx context.Context, log *stdlog.Logger, client promremote.Client, tsList promremote.TSList, headers map[string]string) (resultout string, err error) {
+	result, writeErr := client.WriteTimeSeries(ctx, tsList, promremote.WriteOptions{Headers: headers})
 	if err := error(writeErr); err != nil {
 		json.NewEncoder(os.Stdout).Encode(struct {
 			Success    bool   `json:"success"`
@@ -114,6 +150,7 @@ func main() {
 	os.Stdout.Sync()
 
 	log.Println("write success")
+	return resultout, err
 }
 
 func (t *labelList) String() string {

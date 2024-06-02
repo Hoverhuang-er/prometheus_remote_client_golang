@@ -110,16 +110,19 @@ type WriteError interface {
 // Config defines the configuration used to construct a client.
 type Config struct {
 	// WriteURL is the URL which the client uses to write to m3coordinator.
-	WriteURL string `yaml:"writeURL"`
+	WriteURL string `yaml,toml:"writeURL"`
+
+	// LoopMode is the mode of the loop from flag -l when it is enabled. cli need write datapoint every loop s
+	LoopTS int `yaml,toml:"loopTS"`
 
 	//HTTPClientTimeout is the timeout that is set for the client.
-	HTTPClientTimeout time.Duration `yaml:"httpClientTimeout"`
+	HTTPClientTimeout time.Duration `yaml,toml:"httpClientTimeout"`
 
 	// Replace to Hashicorp go-retryablehttp, If not nil, http client is used instead of constructing one.
 	HTTPClient *retryablehttp.Client
 
 	// UserAgent is the `User-Agent` header in the request.
-	UserAgent string `yaml:"userAgent"`
+	UserAgent string `yaml,toml:"userAgent"`
 }
 
 // ConfigOption defines a config option that can be used when constructing a client.
@@ -140,14 +143,15 @@ func (c Config) validate() error {
 		return fmt.Errorf("http client timeout should be greater than 0: %d", c.HTTPClientTimeout)
 	}
 
+	if c.LoopTS < 1 {
+		return fmt.Errorf("loop mode should be greater than 1: %d", c.LoopTS)
+	}
 	if c.WriteURL == "" {
 		return errors.New("remote write URL should not be blank")
 	}
-
 	if c.UserAgent == "" {
 		return errors.New("User-Agent should not be blank")
 	}
-
 	return nil
 }
 
@@ -155,6 +159,13 @@ func (c Config) validate() error {
 func WriteURLOption(writeURL string) ConfigOption {
 	return func(c *Config) {
 		c.WriteURL = writeURL
+	}
+}
+
+// LoopTSOption sets the mode of the loop from flag -l when it is enabled. cli need write datapoint every loop s
+func LoopTSOption(loopTS int) ConfigOption {
+	return func(c *Config) {
+		c.LoopTS = loopTS
 	}
 }
 

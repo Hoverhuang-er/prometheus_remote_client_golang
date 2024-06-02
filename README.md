@@ -17,6 +17,7 @@ purposes.
 
 ### Update
 
+- 2024-06-01 Add loop mode and context mode, when loop mode greater than 1, the client will send remote write to enpoint every flag interval, and when context mode is not 0, the client will send remote write to endpoint with context time duration.
 - 2024-05-31 Release v0.1.0, it both support client and cli. cli can be used to send metrics to a Prometheus remote write endpoint. download the binary from release page.
 - 2024-05-30 Use hashicorp/go-retryablehttp instead of net/http for retryable http client and batch upgrate go mod dependencies.
 - 2024-05-29 Switch go version from 1.14 to 1.22.3, and add Prometheus remote write URL to env variable support.
@@ -69,21 +70,31 @@ if err := client.WriteTimeSeries(timeSeriesList); err != nil {
 If one wants to use `promremote` as a CLI, he or she can utilize the tool located in the `cmd/`
 directory. The tool takes in a series of labels and a datapoint then writes them to a Prometheus
 remote write endpoint. Below is an example showing a metric with two labels
-(`__name__:foo_bar` and `biz:baz`) and a datapoint (timestamp:`now` value:`1415.92`).
+(`__name__:foo_bar` and `biz:baz`) and a datapoint (timestamp:`now` value:`1415.92`). And optional with context and loop
+
 
 **Note**: One can either specify a Unix timestamp (e.g. `1556026725`) or the keyword `now` as the
 first parameter in the `-d` flag.
 
-#### Install
+#### Install & Run
 
 ```bash
 go install github.com/Hoverhuang-er/prometheus_remote_client_golang/cmd/promremotecli
+promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
 ```
 
 #### mauanl run
 
+- Run the CLI tool from the root of the repository with default flags.
+
 ```bash
 go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
+```
+
+- Run the CLI tool from the root of the repository with custom flags.
+
+```bash
+go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=http://localhost:9090/api/v1/write -c=30 -l=5
 ```
 
 #### Download binary
@@ -96,7 +107,11 @@ mv promremotecli_linux_amd64 promremotecli
 chmod +x promremotecli
 mv promremotecli /usr/local/bin
 ```
-Run the binary
+Run the binary with default flags.
 ```bash
 promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
+```
+Run the binary with custom flags.
+```bash
+promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=http://localhost:9090/api/v1/write -c=30 -l=5
 ```

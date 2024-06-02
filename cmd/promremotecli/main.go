@@ -47,7 +47,7 @@ func main() {
 	var (
 		log            = stdlog.New(os.Stderr, "promremotecli_log ", stdlog.LstdFlags)
 		writeURLFlag   string
-		loopFlag       int
+		loopFlag       int // 0 to disable loop mode
 		ctxFlag        int
 		labelsListFlag labelList
 		headerListFlag headerList

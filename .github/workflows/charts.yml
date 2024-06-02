@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-      - dev-startup
-      - mock_*
+      - master
     tags:
-      - "l*"
+      - "c*"
+    tags-ignore:
       - "v*"
-      - "v*.*"
 
 concurrency:
   group: ${{ github.ref }}

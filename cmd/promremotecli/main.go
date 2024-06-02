@@ -56,7 +56,7 @@ func main() {
 
 	flag.StringVar(&writeURLFlag, "u", promremote.DefaultRemoteWrite, "remote write endpoint")
 	flag.IntVar(&loopFlag, "l", 1, "enable loop mode, write datapoint every 1s. 0 to disable loop mode.")
-	flag.IntVar(&ctxFlag, "ctx", 5, "enable context mode, when context.deadline is reached, printout the result and exit.")
+	flag.IntVar(&ctxFlag, "c", 5, "enable context mode, when context.deadline is reached, printout the result and exit.")
 	flag.Var(&labelsListFlag, "t", "label pair to include in metric. specify as key:value e.g. status_code:200")
 	flag.Var(&headerListFlag, "h", "headers to set in the request, e.g. 'User-Agent: foo'")
 	flag.Var(&dpFlag, "d", "datapoint to add. specify as unixTimestamp(int),value(float) e.g. 1556026059,14.23. use `now` instead of timestamp for current time")

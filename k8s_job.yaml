@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: promremotecli
+spec:
+  template:
+    spec:
+      containers:
+        - name: promremotecli
+          image: your-image-name
+          command: ["promeremotecli", "-u", "$(URL)", "-h", "$(UA)", "-d", "$(DP)", "-t", "$(TS)", "-l", "$(LO)", "-c", "$(CTX)"]
+          env:
+            - name: URL
+              value: "https://promremotesample.hoverstudio.workers.dev/api/v1/write"
+            - name: UA
+              value: "User-Agent: Go-http-client/1.1"
+            - name: DP
+              value: "247.98"
+            - name: TS
+              value: "[1625240000, 1625240001]"
+            - name: LO
+              value: "30"
+            - name: CTX
+              value: "30"
+      restartPolicy: Never
+  backoffLimit: 4

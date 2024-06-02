@@ -17,6 +17,7 @@ purposes.
 
 ### Update
 
+- 2024-06-02 Add k8s job yaml file for promremotecli
 - 2024-06-01 Add loop mode and context mode, when loop mode greater than 1, the client will send remote write to enpoint every flag interval, and when context mode is not 0, the client will send remote write to endpoint with context time duration.
 - 2024-05-31 Release v0.1.0, it both support client and cli. cli can be used to send metrics to a Prometheus remote write endpoint. download the binary from release page.
 - 2024-05-30 Use hashicorp/go-retryablehttp instead of net/http for retryable http client and batch upgrate go mod dependencies.
@@ -80,7 +81,7 @@ first parameter in the `-d` flag.
 
 ```bash
 go install github.com/Hoverhuang-er/prometheus_remote_client_golang/cmd/promremotecli
-promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
+promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=https://promremotesample.hoverstudio.workers.dev/api/v1/write
 ```
 
 #### mauanl run
@@ -94,7 +95,7 @@ go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
 - Run the CLI tool from the root of the repository with custom flags.
 
 ```bash
-go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=http://localhost:9090/api/v1/write -c=30 -l=5
+go run cmd/promremotecli/main.go -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=https://promremotesample.hoverstudio.workers.dev/api/v1/write -c=30 -l=5
 ```
 
 #### Download binary
@@ -113,5 +114,5 @@ promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92
 ```
 Run the binary with custom flags.
 ```bash
-promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=http://localhost:9090/api/v1/write -c=30 -l=5
+promremotecli -t=__name__:foo_bar -t=biz:baz -d=now,1415.92 -u=https://promremotesample.hoverstudio.workers.dev/api/v1/write -c=30 -l=5
 ```
